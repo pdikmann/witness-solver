@@ -41,24 +41,24 @@
     (find-path_ g start-node end-node)
     *path*))
 
-(defun find-simple (g start-node end-node &optional (prev nil) (path nil) (this-node start-node))
-  ;; @todo finish this
-  "don't setf - return something nicer"
-  (let* ((next-nodes (adjacent-nodes g this-node))
-         (available-nodes (remove-if #'(lambda (e) (member e path))
-                                     next-nodes)))
-    (cond
-      ((eq this-node end-node)          ; win!
-       this-node)
-      ((null available-nodes)           ; fail!
-       nil)
-      (t                                ; continue working
-       (cons this-node
-             (mapcar #'(lambda (nn)
-                         (find-simple g
-                                      start-node
-                                      end-node
-                                      this-node
-                                      (cons this-node path)
-                                      nn))
-                     available-nodes))))))
+;; (defun find-simple (g start-node end-node &optional (prev nil) (path nil) (this-node start-node))
+;;   ;; @todo finish this
+;;   "don't setf - return something nicer"
+;;   (let* ((next-nodes (adjacent-nodes g this-node))
+;;          (available-nodes (remove-if #'(lambda (e) (member e path))
+;;                                      next-nodes)))
+;;     (cond
+;;       ((eq this-node end-node)          ; win!
+;;        this-node)
+;;       ((null available-nodes)           ; fail!
+;;        nil)
+;;       (t                                ; continue working
+;;        (cons this-node
+;;              (mapcar #'(lambda (nn)
+;;                          (find-simple g
+;;                                       start-node
+;;                                       end-node
+;;                                       this-node
+;;                                       (cons this-node path)
+;;                                       nn))
+;;                      available-nodes))))))

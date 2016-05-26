@@ -44,3 +44,18 @@
 
 (defun numstring (num)
   (format nil "~d" num))
+
+(defun connectsp (edge n1 n2)
+  "does edge `edge` connect nodes `n1` and `n2`?"
+  (or (and (eq (edge-n1 edge) n1)
+           (eq (edge-n2 edge) n2))
+      (and (eq (edge-n1 edge) n2)
+           (eq (edge-n2 edge) n1))))
+
+(defun assoc-edge (edges n1 n2)
+  (cond
+    ((null edges) nil)
+    ((connectsp (first edges)
+                n1 n2)
+     (first edges))
+    (t (assoc-edge (rest edges) n1 n2))))
