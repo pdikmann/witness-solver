@@ -16,13 +16,16 @@
                          :style style)
               (graph-edges g))))
 
-(defun add-cell (g label connections)
-  (let ((ci (add-node g (plain-node label))))
-    (mapcar #'(lambda (ni) (add-edge g ci ni "invis"))
-            connections))
+(defun add-cell (g index nodes)
   ;; @todo store in proper struct, add to *cells* list.
   ;; use to visualize in-cell symbols
-  )
+  ;; don't put edges into same graph structure - use some meta / second-layer graph for that
+  ;; only render them, don't have them in the structure used for solving
+  (let ((c (make-cell :name (concatenate 'string "n" (numstring index))
+                      :label (numstring index)
+                      :nodes nodes)))
+    (setf (graph-cells g)
+                (cons c (graph-cells g)))))
 
 (defun pin-node (g label position)
   "expects position as '(x y)"
@@ -39,7 +42,7 @@
 (defun grid-graph (x y)
   "construct a grid-shaped graph of dimensions `x` (width) and `y` (height)"
   (let ((g (make-graph)))
-    (labels ((grid (x y &optional (cx 1) (cy 1))
+    (labels ((grid (x y &optional (cx 1) (cy 1)) ; no need to pass x y (in closure)
                (let ((index (+ (1- cx)
                                (* x (1- cy)))))
                  (cond
@@ -53,7 +56,7 @@
                    ((eq cx x)
                     (add-node g (default-node (numstring index)))
                     (pin-last-node g (list cx cy))
-                    (unless (eq cy y)  ; connect all rows except last
+                    (unless (eq cy y)   ; connect all rows except last
                       (add-edge g index (+ x index)))
                     (grid x y 1 (1+ cy)))
                    ;; add to current row
@@ -61,8 +64,19 @@
                     (add-node g (default-node (numstring index)))
                     (pin-last-node g (list cx cy))
                     (add-edge g index (1+ index))
-                    (unless (eq cy y)  ; connect all rows except last
+                    (unless (eq cy y)   ; connect all rows except last
                       (add-edge g index (+ x index)))
-                    (grid x y (1+ cx) cy))))))
-      (grid x y))
+                    (grid x y (1+ cx) cy)))))
+             (cell-nodes (i x)   ; don't need to pass x y (in closure)
+               (let* ((base
+                       (+ i (floor (/ i (1- x)))))
+                      (nodes ; ccw starting at lowest node index
+                       (list base (+ base 1)
+                             (+ base x 1) (+ base x))))
+                 nodes))
+             (cells (x y)        ; don't need to pass x y (in closure)
+               (loop for i from 0 below (* (1- x) (1- y)) do
+                    (add-cell g i (cell-nodes i x)))))
+      (grid x y)
+      (cells x y))
     g))

@@ -2,22 +2,32 @@
 ;; models
 (defstruct graph
   (nodes nil)
-  (edges nil))
+  (edges nil)
+  (cells nil))
 
 (defstruct node
   (name "NONAME")
   (label "NOLABEL")
-  (shape "circle")
+  (shape "plaintext")
   (style nil)
   (pos nil)
-  (special nil))
+  ;; (special nil)
+  )
 
 (defstruct edge
   (label "x")
   (n1 0)
   (n2 0)
+  ;; @todo maybe add node names here for easier rendering?
   (color nil)
-  (style nil))
+  (style nil)
+  ;; (special nil)
+  )
+
+(defstruct (cell (:include node))
+  (nodes nil)
+  ;; (special nil)
+  )
 
 (defparameter *graph* (make-graph))
 ;; (defparameter *nodes* '())

@@ -4,6 +4,7 @@
 ;; -----------------------------------------------------------------------------
 ;; render data into neato files
 (defun render-edge (g e)
+  "needs to know about graph because edges only store node indices, not names"
   (let ((n1n (node-name (nth (edge-n1 e) (graph-nodes g))))
         (n2n (node-name (nth (edge-n2 e) (graph-nodes g)))))
     (concatenate 'string n1n " -- " n2n
@@ -27,16 +28,34 @@
                               (numstring (first (node-pos n))) ","
                               (numstring (second (node-pos n)))
                               "\","))
-               "color=transparent,"
                "width=0.1,height=0.1,fixedsize=shape,"
                "shape=" (node-shape n) "];"))
 
+(defun render-cell (c)
+  (let ((node
+         (concatenate 'string (string (node-name c))
+                      "[label=\"" (node-label c) "\","
+                      "width=0.1,height=0.1,fixedsize=shape,"
+                      "shape=" (node-shape c) "];"))
+        ;; (edge-structs
+        ;;  (mapcar #'(lambda (n)
+        ;;              (make-edge :n1 (first nlst)
+        ;;                         :n2 (second nlst)
+        ;;                         :style "invis"))
+        ;;           (cell-nodes c)))
+        ;; (edges-render
+        ;;  (apply #'concatenate 'string ))
+        )
+    ;; @todo also: call render-edge for (cell-nodes c)
+    node))
+
 (defun render-graph (g)
-  (flet ((edge (e) (render-edge g e)))
+  (flet ((render-edges (e) (render-edge g e)))
     (concatenate 'string
                  "graph G {"
                  (collect (mapcar #'render-node (graph-nodes g)))
-                 (collect (mapcar #'edge (graph-edges g)))
+                 (collect (mapcar #'render-edges (graph-edges g)))
+                 (collect (mapcar #'render-cell (graph-cells g)))
                  "}")))
 
 ;; -----------------------------------------------------------------------------
