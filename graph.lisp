@@ -21,8 +21,8 @@
   ;; use to visualize in-cell symbols
   ;; don't put edges into same graph structure - use some meta / second-layer graph for that
   ;; only render them, don't have them in the structure used for solving
-  (let ((c (make-cell :name (concatenate 'string "n" (numstring index))
-                      :label (numstring index)
+  (let ((c (make-cell :name (concatenate 'string "cell" (numstring index))
+                      :label (concatenate 'string "c_" (numstring index))
                       :nodes nodes)))
     (setf (graph-cells g)
                 (cons c (graph-cells g)))))

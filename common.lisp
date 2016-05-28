@@ -18,6 +18,8 @@
   (label "x")
   (n1 0)
   (n2 0)
+  (n1-name nil)
+  (n2-name nil)
   ;; @todo maybe add node names here for easier rendering?
   (color nil)
   (style nil)

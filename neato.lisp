@@ -5,8 +5,14 @@
 ;; render data into neato files
 (defun render-edge (g e)
   "needs to know about graph because edges only store node indices, not names"
-  (let ((n1n (node-name (nth (edge-n1 e) (graph-nodes g))))
-        (n2n (node-name (nth (edge-n2 e) (graph-nodes g)))))
+  (let ((n1n
+         (or (edge-n1-name e)
+             (node-name (nth (edge-n1 e)
+                             (graph-nodes g)))))
+        (n2n
+         (or (edge-n2-name e)
+             (node-name (nth (edge-n2 e)
+                             (graph-nodes g))))))
     (concatenate 'string n1n " -- " n2n
                  "[label=\"" (edge-label e) "\""
                  (if (edge-style e)
@@ -31,31 +37,31 @@
                "width=0.1,height=0.1,fixedsize=shape,"
                "shape=" (node-shape n) "];"))
 
-(defun render-cell (c)
-  (let ((node
-         (concatenate 'string (string (node-name c))
-                      "[label=\"" (node-label c) "\","
-                      "width=0.1,height=0.1,fixedsize=shape,"
-                      "shape=" (node-shape c) "];"))
-        ;; (edge-structs
-        ;;  (mapcar #'(lambda (n)
-        ;;              (make-edge :n1 (first nlst)
-        ;;                         :n2 (second nlst)
-        ;;                         :style "invis"))
-        ;;           (cell-nodes c)))
-        ;; (edges-render
-        ;;  (apply #'concatenate 'string ))
-        )
-    ;; @todo also: call render-edge for (cell-nodes c)
-    node))
+(defun render-cell (g c)
+  (let* ((node
+          (concatenate 'string (string (node-name c))
+                       "[label=\"" (node-label c) "\","
+                       "width=0.1,height=0.1,fixedsize=shape,"
+                       "shape=" (node-shape c) "];"))
+         (edge-structs
+          (mapcar #'(lambda (n)
+                      (make-edge :n1-name (node-name c)
+                                 :n2 n
+                                 :style "invis"))
+                  (cell-nodes c)))
+         (edge-renders
+          (mapcar #'(lambda (e) (render-edge g e))
+                  edge-structs)))
+    (apply #'concatenate 'string node edge-renders)))
 
 (defun render-graph (g)
-  (flet ((render-edges (e) (render-edge g e)))
+  (flet ((render-edge_ (e) (render-edge g e))
+         (render-cell_ (c) (render-cell g c)))
     (concatenate 'string
                  "graph G {"
                  (collect (mapcar #'render-node (graph-nodes g)))
-                 (collect (mapcar #'render-edges (graph-edges g)))
-                 (collect (mapcar #'render-cell (graph-cells g)))
+                 (collect (mapcar #'render-edge_ (graph-edges g)))
+                 (collect (mapcar #'render-cell_ (graph-cells g)))
                  "}")))
 
 ;; -----------------------------------------------------------------------------
