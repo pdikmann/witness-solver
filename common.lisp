@@ -1,6 +1,11 @@
 ;; -----------------------------------------------------------------------------
 ;; models
-(defstruct graph
+(defun simplified-printer (obj strm prn-dpth)
+  (format strm "S#(SIMPLIFIED)"))
+
+(defstruct (graph (:print-function simplified-printer))
+  (width 0) ; in our special (grid) case
+  (height 0) ; in our special (grid) case
   (nodes nil)
   (edges nil)
   (cells nil))
@@ -13,7 +18,7 @@
   (pos nil)
   ;; (special nil)
   )
-
+ 
 (defstruct edge
   (label "x")
   (n1 0)
@@ -32,9 +37,6 @@
   )
 
 (defparameter *graph* (make-graph))
-;; (defparameter *nodes* '())
-;; (defparameter *edges* '())
-;; (defparameter *cells* '())
 
 (defun default-node (label)
   (make-node :name (string (gensym))

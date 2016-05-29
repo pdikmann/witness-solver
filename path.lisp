@@ -37,9 +37,69 @@
                available-nodes)))))
 
 (defun find-path (g start-node end-node)
+  "return all valid paths (solutions) on the graph from start-node to end-node"
   (let ((*path* nil))
     (find-path_ g start-node end-node)
     *path*))
+
+(defun cell-neighbors (g cell)
+  "CELL: cell grid index"
+  (let ((w (1- (graph-width g)))
+        (h (1- (graph-height g))))
+    (remove-if #'null
+               (list (unless (= (mod cell w) 0) ; cell is at left edge
+                       (1- cell))
+                     (unless (= (mod cell w) (1- w)) ; cell is at right edge
+                       (1+ cell)) 
+                     (unless (= (floor (/ cell w)) 0) ; cell at bottom
+                       (- cell w)) 
+                     (unless (= (floor (/ cell w)) (1- h)) ; cell at top
+                       (+ cell w))
+                     ))))
+
+(defun separated? (c1 c2 solution)
+  "C1, C2: cell structs of adjacent cells
+SOLUTION: list of succesive nodes traced by solution path"
+  (let* ( ;;(c1 (first (graph-cells *foo*)))
+         ;;(c2 (second (graph-cells *foo*)))
+         (border (intersection (cell-nodes c1)
+                               (cell-nodes c2)))
+         (n1 (first border))
+         (n2 (second border)))
+    (or (search (list n1 n2) solution)
+        (search (list n2 n1) solution))))
+
+(defun explore-block (g solution in
+                      &optional
+                        (out '())
+                        (index (1- (length in))))
+  "IN: list of cell grid indices in block, e.g. '(0) on very first call"
+  (let* ((current-cell (nth index in))
+         (neighbors (cell-neighbors g current-cell)) ; indices
+         (out? #'(lambda (other-cell)
+                   (separated? (nth current-cell (graph-cells g))
+                               (nth other-cell (graph-cells g))
+                               solution )))
+         (present-in? #'(lambda (new-index)
+                          (member new-index in)))
+         (present-out? #'(lambda (new-index)
+                           (member new-index out)))
+         (new-in (remove-if present-in?
+                            (remove-if out? neighbors)))
+         (new-out (remove-if present-out?
+                             (remove-if (complement out?) neighbors))))
+    (if (and (null new-in)
+             (= index 0))
+        (list in (append new-out out))  ; done
+        (explore-block g
+                       solution
+                       (append new-in in)
+                       (append new-out out)
+                       (1- (+ index (length new-in)))))))
+
+(defun cell-blocks (g solution)
+  "return a list of blocks (connected cells) that are separated by the trail of the solution"
+  )
 
 ;; (defun find-simple (g start-node end-node &optional (prev nil) (path nil) (this-node start-node))
 ;;   ;; @todo finish this

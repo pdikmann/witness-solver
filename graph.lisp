@@ -2,8 +2,9 @@
 ;; making nodes and edges
 (defun add-node (g node)
   "returns index of node in *nodes*"
-  (setf (graph-nodes g) (reverse (cons node
-                                       (reverse (graph-nodes g)))))
+  (setf (graph-nodes g)
+        (reverse (cons node
+                       (reverse (graph-nodes g)))))
   (1- (length (graph-nodes g))))
 
 (defun add-edge (g n1 n2 &optional (style nil))
@@ -17,15 +18,12 @@
               (graph-edges g))))
 
 (defun add-cell (g index nodes)
-  ;; @todo store in proper struct, add to *cells* list.
-  ;; use to visualize in-cell symbols
-  ;; don't put edges into same graph structure - use some meta / second-layer graph for that
-  ;; only render them, don't have them in the structure used for solving
   (let ((c (make-cell :name (concatenate 'string "cell" (numstring index))
-                      :label (concatenate 'string "c_" (numstring index))
+                      :label (numstring index)
                       :nodes nodes)))
     (setf (graph-cells g)
-                (cons c (graph-cells g)))))
+          (reverse (cons c
+                         (reverse (graph-cells g)))))))
 
 (defun pin-node (g label position)
   "expects position as '(x y)"
@@ -41,7 +39,7 @@
 ;; construction
 (defun grid-graph (x y)
   "construct a grid-shaped graph of dimensions `x` (width) and `y` (height)"
-  (let ((g (make-graph)))
+  (let ((g (make-graph :width x :height y)))
     (labels ((grid (x y &optional (cx 1) (cy 1)) ; no need to pass x y (in closure)
                (let ((index (+ (1- cx)
                                (* x (1- cy)))))
