@@ -97,9 +97,26 @@ SOLUTION: list of succesive nodes traced by solution path"
                        (append new-out out)
                        (1- (+ index (length new-in)))))))
 
+(defun cell-blocks_ (g solution done todo done-flat)
+  (let* ((result (explore-block g
+                                solution
+                                (list (first todo))))
+         (found (first result))
+         (new-flat (append found done-flat))
+         (left (remove-if #'(lambda (e)
+                              (member e new-flat))
+                          (append (rest todo)
+                                  (second result)))))
+    (if (null left)
+        (cons found done)
+        (cell-blocks_ g solution
+                      (cons found done)
+                      left
+                      new-flat))))
+
 (defun cell-blocks (g solution)
   "return a list of blocks (connected cells) that are separated by the trail of the solution"
-  )
+  (cell-blocks_ g solution nil '(0) nil))
 
 ;; (defun find-simple (g start-node end-node &optional (prev nil) (path nil) (this-node start-node))
 ;;   ;; @todo finish this
