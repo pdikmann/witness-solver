@@ -3,11 +3,14 @@
 (defparameter *path* '())
 
 (defun adjacent-edges (g node-index)
-  (remove-if-not #'(lambda (e) (or (eq (edge-n1 e) node-index)
-                                   (eq (edge-n2 e) node-index)))
-                 (graph-edges g)))
+  (declare (type (unsigned-byte 8) node-index))
+  (the list
+       (remove-if-not #'(lambda (e) (or (eq (edge-n1 e) node-index)
+                                        (eq (edge-n2 e) node-index)))
+                      (graph-edges g))))
 
 (defun adjacent-nodes (g node-index)
+  (declare (type (unsigned-byte 8) node-index))
   (let ((edges (adjacent-edges g node-index)))
     (mapcar #'(lambda (e)
                 (if (eq (edge-n1 e) node-index)
@@ -17,6 +20,8 @@
 
 (defun find-path_ (g start-node end-node &optional (path nil) (this-node start-node))
   "helper for find-path. uses *path* to accumulate valid paths"
+  (declare (type (unsigned-byte 8) this-node start-node end-node)
+           (type list path))
   (let* ((next-nodes (adjacent-nodes g this-node))
          (available-nodes (remove-if #'(lambda (e) (member e path))
                                      next-nodes)))
